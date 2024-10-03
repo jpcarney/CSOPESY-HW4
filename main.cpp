@@ -6,30 +6,12 @@ COORD getCursorPosition(){
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-    // Get the console buffer information
     if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-        return csbi.dwCursorPosition; // Return the cursor position
+        return csbi.dwCursorPosition;
     }
 
-    // In case of failure, return an invalid position
+    // in case of failure
     return {0, 0};
-}
-
-void goTo(){
-
-}
-
-void returnToBottom() {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hConsole, &csbi); // Get console info
-
-    // Set cursor position to the last row (height - 1) and first column (X = 0)
-    COORD coord;
-    coord.X = 0; // First column
-    coord.Y = csbi.srWindow.Bottom; // Last row
-
-    SetConsoleCursorPosition(hConsole, coord); // Move cursor to the bottom
 }
 
 void drawHeader() {
@@ -49,7 +31,6 @@ void drawHeader() {
 }
 
 void drawProcesses() {
-    // Draw the static part of the process output
     std::cout << "+-----------------------------------------------------------------------------------------+\n";
     std::cout << "| Processes:                                                                              |\n";
     std::cout << "|  GPU   GI   CI        PID   Type   Process name                              GPU Memory |\n";
@@ -64,26 +45,17 @@ void drawProcesses() {
 }
 
 void updateGpuMemoryUsage(int processIndex, const std::string& newUsage) {
-    // Get the console handle
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    // Check if the new usage string exceeds the maximum length
     if (newUsage.length() > 5) {
         throw std::runtime_error("Error: GPU memory usage exceeds maximum length of 5 characters.");
     }
 
-    // Set the cursor position to the specific process line
-    COORD coord = { 81, static_cast<SHORT>(17 + processIndex) };  // Change the Y value based on the line number
+    COORD coord = { 81, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
     SetConsoleCursorPosition(hConsole, coord);
-
-    // Limit the new usage string to a maximum of 5 characters
     std::string truncatedUsage = newUsage.substr(0, 5); // Take up to 5 characters
-
-    // Append " MiB" to the truncated usage and ensure the total length is 8 for formatting
     std::string formattedUsage = truncatedUsage + "MiB";
-
-    // Print the new GPU memory usage with padding to keep layout
-    std::cout << formattedUsage << std::string(8 - formattedUsage.length(), ' '); // To clear any remaining characters in the field
+    std::cout << formattedUsage << std::string(8 - formattedUsage.length(), ' ');
 }
 
 
@@ -93,19 +65,18 @@ int main() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD originalCursorPosition = getCursorPosition();
 
-    try {
-        // Update GPU memory usage for the first process (index 0)
-        updateGpuMemoryUsage(0, "12345"); // This will trigger the error
+    try { // catches errors that would cause layout issues
+        updateGpuMemoryUsage(0, "12345");
     } catch (const std::runtime_error& e) {
         system("cls");
         std::cerr << e.what() << std::endl; // Print the error message to the console
         std::cout << "\nPress Enter to exit...";
-        std::cin.get(); // Waits for you to press Enter
+        std::cin.get();
         return 0;
     }
 
     SetConsoleCursorPosition(hConsole, originalCursorPosition);
     std::cout << "\nPress Enter to exit...";
-    std::cin.get(); // Waits for you to press Enter
+    std::cin.get();
     return 0;
 }
