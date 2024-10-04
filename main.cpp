@@ -27,7 +27,6 @@ void drawHeader() {
     std::cout << "| 28%   37C    P8             11W /  180W |     701MiB /   8192MiB |      0%      Default |\n";
     std::cout << "|                                         |                        |                  N/A |\n";
     std::cout << "+-----------------------------------------+------------------------+----------------------+\n";
-
 }
 
 void drawProcesses() {
@@ -44,20 +43,50 @@ void drawProcesses() {
     std::cout << "+-----------------------------------------------------------------------------------------+\n";
 }
 
-void updateGpuMemoryUsage(int processIndex, const std::string& newUsage) {
+void updateProcessInfo(int processIndex, const std::string & pid, const std::string & type, const std::string & processName, const std::string & gpuUsage) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    if (newUsage.length() > 5) {
-        throw std::runtime_error("Error: GPU memory usage exceeds maximum length of 5 characters.");
+    std::string newPid = pid;
+    std::string newType = type;
+    std::string modifiedProcessName = processName;
+    std::string newUsage = gpuUsage;
+
+    if (pid.length() > 5) {
+        newPid = "..." + pid.substr(pid.length() - 2, 2);  // keep last 2 characters if overflow
     }
 
-    COORD coord = { 81, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
+    COORD coord = { 22, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
     SetConsoleCursorPosition(hConsole, coord);
-    std::string truncatedUsage = newUsage.substr(0, 5); // Take up to 5 characters
+    std::string truncatedPid = newPid.substr(0, 5); // up to 5 characters
+    std::cout << truncatedPid << std::string(8 - truncatedPid.length(), ' ');
+
+    if (gpuUsage.length() > 5) {
+        newUsage = "..." + gpuUsage.substr(gpuUsage.length() - 2, 2);
+    }
+
+    coord = { 81, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
+    SetConsoleCursorPosition(hConsole, coord);
+    std::string truncatedUsage = newUsage.substr(0, 5); // up to 5 characters
     std::string formattedUsage = truncatedUsage + "MiB";
     std::cout << formattedUsage << std::string(8 - formattedUsage.length(), ' ');
 }
 
+
+void updateGpuMemoryUsage(int processIndex, const std::string & newUsage) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    std::string modifiedUsage = newUsage;
+
+    if (newUsage.length() > 5) {
+        modifiedUsage = "..." + newUsage.substr(newUsage.length() - 2, 2);  // keep last 2 characters if overflow
+    }
+
+    COORD coord = { 81, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
+    SetConsoleCursorPosition(hConsole, coord);
+    std::string truncatedUsage = modifiedUsage.substr(0, 5); // up to 5 characters
+    std::string formattedUsage = truncatedUsage + "MiB";
+    std::cout << formattedUsage << std::string(8 - formattedUsage.length(), ' ');
+}
 
 int main() {
     drawHeader();
@@ -65,15 +94,7 @@ int main() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD originalCursorPosition = getCursorPosition();
 
-    try { // catches errors that would cause layout issues
-        updateGpuMemoryUsage(0, "12345");
-    } catch (const std::runtime_error& e) {
-        system("cls");
-        std::cerr << e.what() << std::endl; // Print the error message to the console
-        std::cout << "\nPress Enter to exit...";
-        std::cin.get();
-        return 0;
-    }
+    updateProcessInfo(0,"12345", "abcd", "efgh", "123456");
 
     SetConsoleCursorPosition(hConsole, originalCursorPosition);
     std::cout << "\nPress Enter to exit...";
