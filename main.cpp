@@ -81,10 +81,12 @@ int main() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD originalCursorPosition = getCursorPosition();
 
-    updateProcessInfo(0,"1234567", "abcdef", R"(E:\games\Phoenix Wright- Ace Attorney Trilogy\Content)", "123456789");
+    updateProcessInfo(0,"11223344", "A+B", R"(E:\notes\main\01 - University Notes\Y3T1\ST-ADVDB\02 - Data Warehouse and ETL.md)", "8192");
+    updateProcessInfo(1,"1234567", "abcdef", R"(E:\games\Phoenix Wright- Ace Attorney Trilogy\Content)", "123456789");
+    updateProcessInfo(2,"7385", "C+G", R"(E:\CLionProjects\CSOPESY HW4\main.cpp)", "20");
+    updateProcessInfo(3,"999", "DRG", R"(E:\Steam\steamapps\common\Warframe\Warframe.x64.exe)", "512");
 
     SetConsoleCursorPosition(hConsole, originalCursorPosition);
-    std::cout << "\nPress Enter to exit...";
     std::cin.get();
     return 0;
 }
