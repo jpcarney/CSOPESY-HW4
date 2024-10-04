@@ -43,48 +43,35 @@ void drawProcesses() {
     std::cout << "+-----------------------------------------------------------------------------------------+\n";
 }
 
+void updateFieldAtPosition(COORD coord, const std::string& field, int maxLength, HANDLE hConsole) {
+    SetConsoleCursorPosition(hConsole, coord);
+    std::string truncatedField = field.substr(0, maxLength);  // Truncate if needed
+    std::cout << truncatedField << std::string(maxLength + 3 - truncatedField.length(), ' ');  // Add padding
+}
+
 void updateProcessInfo(int processIndex, const std::string & pid, const std::string & type, const std::string & processName, const std::string & gpuUsage) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    std::string newPid = pid;
-    std::string newType = type;
-    std::string modifiedProcessName = processName;
-    std::string newUsage = gpuUsage;
+    // Update PID
+    std::string newPid = pid.length() > 5 ? "..." + pid.substr(pid.length() - 2, 2) : pid;
+    COORD pidCoord = { 22, static_cast<SHORT>(17 + processIndex) };
+    updateFieldAtPosition(pidCoord, newPid, 5, hConsole);
 
-    if (pid.length() > 5) {
-        newPid = "..." + pid.substr(pid.length() - 2, 2);  // keep last 2 characters if overflow
-    }
+    // Update Type
+    std::string newType = type.length() > 3 ? ".." + type.substr(type.length() - 1, 1) : type;
+    COORD typeCoord = { 31, static_cast<SHORT>(17 + processIndex) };
+    updateFieldAtPosition(typeCoord, newType, 5, hConsole);
 
-    COORD coord = { 22, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
-    SetConsoleCursorPosition(hConsole, coord);
-    std::string truncatedPid = newPid.substr(0, 5); // up to 5 characters
-    std::cout << truncatedPid << std::string(8 - truncatedPid.length(), ' ');
+    // Update Process Name
+    std::string newProcessName = processName.length() > 38 ? "..." + processName.substr(processName.length() - 35, 35) : processName;
+    COORD processNameCoord = { 37, static_cast<SHORT>(17 + processIndex) };
+    updateFieldAtPosition(processNameCoord, newProcessName, 38, hConsole);
 
-    if (gpuUsage.length() > 5) {
-        newUsage = "..." + gpuUsage.substr(gpuUsage.length() - 2, 2);
-    }
-
-    coord = { 81, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
-    SetConsoleCursorPosition(hConsole, coord);
-    std::string truncatedUsage = newUsage.substr(0, 5); // up to 5 characters
-    std::string formattedUsage = truncatedUsage + "MiB";
-    std::cout << formattedUsage << std::string(8 - formattedUsage.length(), ' ');
-}
-
-
-void updateGpuMemoryUsage(int processIndex, const std::string & newUsage) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    std::string modifiedUsage = newUsage;
-
-    if (newUsage.length() > 5) {
-        modifiedUsage = "..." + newUsage.substr(newUsage.length() - 2, 2);  // keep last 2 characters if overflow
-    }
-
-    COORD coord = { 81, static_cast<SHORT>(17 + processIndex) };  // change y value based on the line number
-    SetConsoleCursorPosition(hConsole, coord);
-    std::string truncatedUsage = modifiedUsage.substr(0, 5); // up to 5 characters
-    std::string formattedUsage = truncatedUsage + "MiB";
+    // Update GPU Memory Usage
+    std::string newUsage = gpuUsage.length() > 5 ? "..." + gpuUsage.substr(gpuUsage.length() - 2, 2) : gpuUsage;
+    COORD usageCoord = { 81, static_cast<SHORT>(17 + processIndex) };
+    SetConsoleCursorPosition(hConsole, usageCoord);
+    std::string formattedUsage = newUsage.substr(0, 5) + "MiB";
     std::cout << formattedUsage << std::string(8 - formattedUsage.length(), ' ');
 }
 
@@ -94,7 +81,7 @@ int main() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD originalCursorPosition = getCursorPosition();
 
-    updateProcessInfo(0,"12345", "abcd", "efgh", "123456");
+    updateProcessInfo(0,"1234567", "abcdef", R"(E:\games\Phoenix Wright- Ace Attorney Trilogy\Content)", "123456789");
 
     SetConsoleCursorPosition(hConsole, originalCursorPosition);
     std::cout << "\nPress Enter to exit...";
